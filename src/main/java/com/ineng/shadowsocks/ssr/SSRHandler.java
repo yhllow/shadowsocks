@@ -1,0 +1,177 @@
+package com.ineng.shadowsocks.ssr;
+
+import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
+import com.ineng.shadowsocks.model.SSRConfig;
+import com.ineng.utils.*;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Slf4j
+public class SSRHandler {
+    static String ssr = "ssr://YS5mcmVlc3MuZnVuOjE2NDI1OmF1dGhfc2hhMV92NF9jb21wYXRpYmxlOnJjNC1tZDU6dGxzMS4yX3RpY2tldF9hdXRoX2NvbXBhdGlibGU6T0RNd016YzBOVE0vP29iZnNwYXJhbT0=";
+    static String cfgFile = "/etc/shadowsocks/config.json";
+
+    public static void main(String[] args) {
+        SSRHandler ssrHandler = new SSRHandler();
+        ssrHandler.parseSSRUrl(ssr, cfgFile);
+        ssrHandler.readSSR(cfgFile);
+
+        decodeSSRSubscribe("c3NyOi8vTVRVM0xqSTBOUzR4T0RBdU1qQTVPakU1T1Rnek9tRjFkR2hmYzJoaE1WOTJORjlqYjIxd1lYUnBZbXhsT21GbGN5MHlOVFl0WTJaaU9uUnNjekV1TWw5MGFXTnJaWFJmWVhWMGFGOWpiMjF3WVhScFlteGxPbU16VGpSTWJrcHNURlJGTVU1cVkzaE5la0V4THo5eVpXMWhjbXR6UFZVeFRsTldSVGxRVkVZNWRXUlhlSE5QYWtGM0ptZHliM1Z3UFZZeFpGaE1iRTVVVld4U1VGUXdkM1ZSTURsTwpzc3I6Ly9NVGt5TGpJME1TNHhPVGt1TWpBd09qRTFPVFkzT21GMWRHaGZjMmhoTVY5Mk5GOWpiMjF3WVhScFlteGxPbUZsY3kweU5UWXRZMlppT25Sc2N6RXVNbDkwYVdOclpYUmZZWFYwYUY5amIyMXdZWFJwWW14bE9tTXpUalJNYmtwc1RGUkZlRTlVVlRKT1JGbDNMejl5WlcxaGNtdHpQVlV4VGxOV1JUbFFWRVk1ZFdSWGVITlBha0Y0Sm1keWIzVndQVll4WkZoTWJFNVVWV3hTVUZRd2QzVlJNRGxPCnNzcjovL01TNHpOaTR5TWpNdU56WTZNekl6TmpBNllYVjBhRjloWlhNeE1qaGZiV1ExT21GbGN5MHlOVFl0WTJaaU9taDBkSEJmYzJsdGNHeGxPbU5YY0hObFJXaHpMejl3Y205MGIzQmhjbUZ0UFUxVWJ6QlhSWGgwVTBVd0puSmxiV0Z5YTNNOVZURk9VMVpGT1ZCVVJqbDFaRmQ0YzA5cVFYa21aM0p2ZFhBOVZqRmtXRXhzVGxSVmJGSlFWREIzZFZFd09VNApzc3I6Ly9OVEl1TmprdU1qUTRMakV3TmpvMU9UazFOanB2Y21sbmFXNDZZV1Z6TFRJMU5pMWpabUk2Y0d4aGFXNDZVMjF2ZUdGRlZsUmpSa0pwVjBoT1ZpOF9jbVZ0WVhKcmN6MVZNVTVUVmtVNVVGUkdYMjFzTmxodGJrdDNkRlpIT1hKbFZ6ZzJUVVJOSm1keWIzVndQVll4WkZoTWJFNVVWV3hTVUZRd2QzVlJNRGxPCnNzcjovL01qTXVNak01TGpFeUxqSTFNVG8wTkRNNmIzSnBaMmx1T21GbGN5MHlOVFl0WTJaaU9uQnNZV2x1T2s5WFVUSlpNazVzV1ZkRmVrNTZUbWxhYWtwcVQwZEdhbGxxU1hsYVZGbDNXV3BhYUU1VWFHbGFWRmt2UDNKbGJXRnlhM005VlRGT1UxWkZPVkJVUmw5dWRtODNiRzAzTUhRMWNHRjNOWEpQT1RaTFYxODFZbVZsVDJwQk1DWm5jbTkxY0QxV01XUllUR3hPVkZWc1VsQlVNSGQxVVRBNVRnCnNzcjovL05EVXVOVFl1TVRBeExqRXlNem8wTkRNNmIzSnBaMmx1T21GbGN5MHlOVFl0WTJaaU9uQnNZV2x1T2s5WFVUSlpNazVzV1ZkRmVrNTZUbWxhYWtwcVQwZEdhbGxxU1hsYVZGbDNXV3BhYUU1VWFHbGFWRmt2UDNKbGJXRnlhM005VlRGT1UxWkZPVkJVUmw5dWRtODNiRzAzTUhRMWNHRjNOWEpQT1RaTFYxODFZbVZsVDJwQk1TWm5jbTkxY0QxV01XUllUR3hPVkZWc1VsQlVNSGQxVVRBNVRnCnNzcjovL01UQXpMalEwTGpZeExqSTBNem8wTmpVeE1qcGhkWFJvWDJGbGN6RXlPRjl0WkRVNllXVnpMVEkxTmkxalptSTZjR3hoYVc0NllWZDRkbVJ0Vm1waFIyeDFXVkV2UDNKbGJXRnlhM005VlRGT1UxWkZPVkJVUmw5d2NIQnViWFZMT0hSV1NFNHhXbGMwWjFZeVJuVkpSVkp3WXpOU2VXRlhUakJQYWtFeUptZHliM1Z3UFZZeFpGaE1iRTVVVld4U1VGUXdkM1ZSTURsTwpzc3I6Ly9ORFV1TVRNd0xqRTBOUzR4TmpNNk5UUXpPbUYxZEdoZllXVnpNVEk0WDIxa05UcGhaWE10TWpVMkxXTjBjanAwYkhNeExqSmZkR2xqYTJWMFgyRjFkR2c2WkVNMWRGcFRPVlJWTVVwVVZsVkpMejl5WlcxaGNtdHpQVlV4VGxOV1JUbFFWRVpmYTNZMFZHNTJXbVp0YkhFNGRGUlhPWHBaTWprelQycEJNeVpuY205MWNEMVdNV1JZVEd4T1ZGVnNVbEJVTUhkMVVUQTVUZwpzc3I6Ly9NVGd1TVRjMkxqVTFMalF3T2pJM05ESTFPbTl5YVdkcGJqcGhaWE10TWpVMkxXTm1ZanB3YkdGcGJqcGxXRlp1V2xVNWVGWlhXakJXTURVeUx6OXlaVzFoY210elBWVXhUbE5XUlRsUVZFWTROazFFWnlabmNtOTFjRDFXTVdSWVRHeE9WRlZzVWxCVU1IZDFVVEE1VGcKc3NyOi8vTVRjeUxqRXdOQzR4TURBdU1UTXpPakUzTkRBd09tOXlhV2RwYmpwaFpYTXRNalUyTFdObVlqcHdiR0ZwYmpwaFZ6Vm9WVlZXZVZkWWJFUlNSbWg2THo5eVpXMWhjbXR6UFZVeFRsTldSVGxRVkVZNE5rMUVheVpuY205MWNEMVdNV1JZVEd4T1ZGVnNVbEJVTUhkMVVUQTVUZwpzc3I6Ly9NVE01TGpFMk1pNDROQzQyTmpvMU1EZzFPRHB2Y21sbmFXNDZZV1Z6TFRJMU5pMWpabUk2Y0d4aGFXNDZWVlJDYjFaVldtMVRNRGw0WTBad1RDOF9jbVZ0WVhKcmN6MVZNVTVUVmtVNVVGUkdYMjFzTmxodGJrdDNkRlpIT1hKbFZ6ZzJUVlJCSm1keWIzVndQVll4WkZoTWJFNVVWV3hTVUZRd2QzVlJNRGxPCnNzcjovL05USXVNVGswTGpJeE9TNHhPRGc2TlRVME1UUTZiM0pwWjJsdU9tRmxjeTB5TlRZdFkyWmlPbkJzWVdsdU9sTnJPWGxoYWtaT1ZESTFUR05VV2pZdlAzSmxiV0Z5YTNNOVZURk9VMVpGT1ZCVVJqZzJUVlJGSm1keWIzVndQVll4WkZoTWJFNVVWV3hTVUZRd2QzVlJNRGxPCnNzcjovL01UY3lMakV3TlM0eU1EY3VNVFEwT2pReE1EZzJPbTl5YVdkcGJqcGhaWE10TWpVMkxXTm1ZanB3YkdGcGJqcFZSMnhEV201dk1tVnFSbGRqYlhBd0x6OXlaVzFoY210elBWVXhUbE5XUlRsUVZFWTROazFVU1NabmNtOTFjRDFXTVdSWVRHeE9WRlZzVWxCVU1IZDFVVEE1VGcKc3NyOi8vTVRjeUxqRXdOQzR4TURVdU5qSTZNakk0T0RrNmIzSnBaMmx1T21GbGN5MHlOVFl0WTJaaU9uQnNZV2x1T2xkWWFGcFRNV2MwWTNwTmQyVlZiRzh2UDNKbGJXRnlhM005VlRGT1UxWkZPVkJVUmpnMlRWUk5KbWR5YjNWd1BWWXhaRmhNYkU1VVZXeFNVRlF3ZDNWUk1EbE8Kc3NyOi8vYzJjdWMzTnljM1ZpTG5oNWVqbzBORE02WVhWMGFGOWhaWE14TWpoZmJXUTFPbUZsY3kweU5UWXRZM1J5T25Sc2N6RXVNbDkwYVdOclpYUmZZWFYwYURwaFNGSXdZMFJ2ZGt3elVYVlpNalIyVWxWa1MxTlliSGxpUVM4X2IySm1jM0JoY21GdFBUVk1kVmsyVEZNMVZURk9VelZ5VDI4MVdXRk5UMjFvTUdSSVFUWk1lVGt3VEcxT2RVd3dWa2hUYTJ3MVkyMTNKbkJ5YjNSdmNHRnlZVzA5WkVNMWRGcFRPVlJWTVVwVVZsVkpKbkpsYldGeWEzTTlWVEZPVTFaRk9WQlVSamcyVFZSUkptZHliM1Z3UFZZeFpGaE1iRTVVVld4U1VGUXdkM1ZSTURsTwpzc3I6Ly9jblV4TG5OemNuTjFZaTU0ZVhvNk5EUXpPbUYxZEdoZllXVnpNVEk0WDIxa05UcGhaWE10TWpVMkxXTjBjanAwYkhNeExqSmZkR2xqYTJWMFgyRjFkR2c2WVVoU01HTkViM1pNTTFGMVdUSTBkbEpWWkV0VFdHeDVZa0V2UDI5aVpuTndZWEpoYlQwMVRIVlpOa3hUTlZVeFRsTTFjazl2TlZsaFRVOXRhREJrU0VFMlRIazVNRXh0VG5WTU1GWklVMnRzTldOdGR5WndjbTkwYjNCaGNtRnRQV1JETlhSYVV6bFVWVEZLVkZaVlNTWnlaVzFoY210elBWVXhUbE5XUlRsUVZFWTROazFVVlNabmNtOTFjRDFXTVdSWVRHeE9WRlZzVWxCVU1IZDFVVEE1VGcKc3NyOi8vYzJjdWMzTnljM1ZpTG5oNWVqbzFORE02WVhWMGFGOWhaWE14TWpoZmJXUTFPbUZsY3kweU5UWXRZM1J5T25Sc2N6RXVNbDkwYVdOclpYUmZZWFYwYURwa1F6VjBXbE01VkZVeFNsUldWVWt2UDI5aVpuTndZWEpoYlQwMVRIVlpOa3hUTlZVeFRsTTFjazl2TlZsaFRVOXRhREJrU0VFMlRIazVNRXh0VG5WTU1GWklVMnRzTldOdGR5WndjbTkwYjNCaGNtRnRQV1JETlhSYVV6bFVWVEZLVkZaVlNTWnlaVzFoY210elBWVXhUbE5XUlRsUVZFWTROazFVV1NabmNtOTFjRDFXTVdSWVRHeE9WRlZzVWxCVU1IZDFVVEE1VGcKc3NyOi8vY25VeExuTnpjbk4xWWk1NGVYbzZOVFF6T21GMWRHaGZZV1Z6TVRJNFgyMWtOVHBoWlhNdE1qVTJMV04wY2pwMGJITXhMakpmZEdsamEyVjBYMkYxZEdnNlpFTTFkRnBUT1ZSVk1VcFVWbFZKTHo5dlltWnpjR0Z5WVcwOU5VeDFXVFpNVXpWVk1VNVROWEpQYnpWWllVMVBiV2d3WkVoQk5reDVPVEJNYlU1MVREQldTRk5yYkRWamJYY21jSEp2ZEc5d1lYSmhiVDFrUXpWMFdsTTVWRlV4U2xSV1ZVa21jbVZ0WVhKcmN6MVZNVTVUVmtVNVVGUkdYMnQyTkZSdWRscG1iV3h4T0hSVVZ6bDZXVEk1TTA5cVJUTW1aM0p2ZFhBOVZqRmtXRXhzVGxSVmJGSlFWREIzZFZFd09VNApzc3I6Ly9NVGN6TGpJMU5TNHlOVFF1TWpJME9qSXpOVGcyT205eWFXZHBianBoWlhNdE1qVTJMV05tWWpwd2JHRnBianBTUlRWWVRUSnZOVnBGT1hSTlJFSmFMejl5WlcxaGNtdHpQVlV4VGxOV1JUbFFWRVpmYm5adk4yeHROekIwTlZseFp6VlphWEExTm1GUU5XSkRPRFZNY1dFMVltVmxUMnBGTkNabmNtOTFjRDFXTVdSWVRHeE9WRlZzVWxCVU1IZDFVVEE1VGcKc3NyOi8vTVRndU1UYzVMamd1TmpBNk16WTROalk2YjNKcFoybHVPbUZsY3kweU5UWXRZMlppT25Cc1lXbHVPbGx1Y0VKV1ZtdDNZbTA1VjFGdFJrSXZQM0psYldGeWEzTTlWVEZPVTFaRk9WQlVSbDl0YkRaWWJXNUxkM1JXUnpseVpWYzROazFVYXlabmNtOTFjRDFXTVdSWVRHeE9WRlZzVWxCVU1IZDFVVEE1VGcKc3NyOi8vTVRndU1UYzVMalV1TVRNNU9qUTFPREV6T205eWFXZHBianBoWlhNdE1qVTJMV05tWWpwd2JHRnBianBhZW1zeVltcG9WMWw2UlRCaFNHUXdMejl5WlcxaGNtdHpQVlV4VGxOV1JUbFFWRVk0TmsxcVFTWm5jbTkxY0QxV01XUllUR3hPVkZWc1VsQlVNSGQxVVRBNVRnCnNzcjovL05UUXVNalV3TGpJd01pNHlNams2TWpRek9EWTZiM0pwWjJsdU9tRmxjeTB5TlRZdFkyWmlPbkJzWVdsdU9rNXNWa2xpTW1nd1pFaGtkRTVyV21zdlAzSmxiV0Z5YTNNOVZURk9VMVpGT1ZCVVJsOXRiRFpZYlc1TGQzUldSemx5WlZjNE5rMXFSU1puY205MWNEMVdNV1JZVEd4T1ZGVnNVbEJVTUhkMVVUQTVUZwpzc3I6Ly9NVGN5TGpFd05TNHlNalV1TVRrNE9qTTJPRFEyT205eWFXZHBianBoWlhNdE1qVTJMV05tWWpwd2JHRnBianBWTURsWVlraHdjMk5WZUd4aVZVcHFMejl5WlcxaGNtdHpQVlV4VGxOV1JUbFFWRVpmYld3MldHMXVTM2QwVmtjNWNtVlhPRFpOYWtrbVozSnZkWEE5VmpGa1dFeHNUbFJWYkZKUVZEQjNkVkV3T1U0CnNzcjovL01UY3lMakV3TlM0eU1URXVNVEF4T2pNeE1qRXpPbTl5YVdkcGJqcGhaWE10TWpVMkxXTm1ZanB3YkdGcGJqcFZWMFozV2tkR2Fsa3haRlpsYXpVekx6OXlaVzFoY210elBWVXhUbE5XUlRsUVZFWmZiV3cyV0cxdVMzZDBWa2M1Y21WWE9EWk5hazBtWjNKdmRYQTlWakZrV0V4c1RsUlZiRkpRVkRCM2RWRXdPVTQKc3NyOi8vTXk0eE1UTXVNalF1TVRNMU9qTTVOVGN6T205eWFXZHBianBoWlhNdE1qVTJMV05tWWpwd2JHRnBianBVYW1SRlRXcFdXR0l4V1hsU1YyaGhMejl5WlcxaGNtdHpQVlV4VGxOV1JUbFFWRVpmYld3MldHMXVTM2QwVmtjNWNtVlhPRFpOYWxFbVozSnZkWEE5VmpGa1dFeHNUbFJWYkZKUVZEQjNkVkV3T1U0CnNzcjovL015NHhNVEl1TVRrM0xqRTRORG8wTWpRNE56cHZjbWxuYVc0NllXVnpMVEkxTmkxalptSTZjR3hoYVc0NlkyMDBNVk5HVW5sT2FrSlFWVmhXTWk4X2NtVnRZWEpyY3oxVk1VNVRWa1U1VUZSR1gyMXNObGh0Ymt0M2RGWkhPWEpsVnpnMlRXcFZKbWR5YjNWd1BWWXhaRmhNYkU1VVZXeFNVRlF3ZDNWUk1EbE8Kc3NyOi8vTVRndU1UYzVMakl3TGpnM09qUTFOREl5T205eWFXZHBianBoWlhNdE1qVTJMV05tWWpwd2JHRnBianBXUlZVelUydHNVVlV6VGtoVk1GSk1Mejl5WlcxaGNtdHpQVlV4VGxOV1JUbFFWRVpmYld3MldHMXVTM2QwVmtjNWNtVlhPRFpOYWxrbVozSnZkWEE5VmpGa1dFeHNUbFJWYkZKUVZEQjNkVkV3T1U0CnNzcjovL01UZ3VNVGMyTGpVMExqSXhPVG95T0RJMk5UcHZjbWxuYVc0NllXVnpMVEkxTmkxalptSTZjR3hoYVc0NlkxaENUbVI2VW5salZWa3paVmRTY3k4X2NtVnRZWEpyY3oxVk1VNVRWa1U1VUZSR09EWk5hbU1tWjNKdmRYQTlWakZrV0V4c1RsUlZiRkpRVkRCM2RWRXdPVTQKc3NyOi8vTVRNdU1URTFMakl3TVM0MU5EbzBORGd4TURwdmNtbG5hVzQ2WVdWekxUSTFOaTFqWm1JNmNHeGhhVzQ2WWpOV2FscDZVa1ZVYWtJMVVqTldWQzhfY21WdFlYSnJjejFWTVU1VFZrVTVVRlJHWDIxc05saHRia3QzZEZaSE9YSmxWemcyVFdwbkptZHliM1Z3UFZZeFpGaE1iRTVVVld4U1VGUXdkM1ZSTURsTwpzc3I6Ly9NVE11TVRFeUxqRTRNQzR4TlRNNk1qVTFOems2YjNKcFoybHVPbUZsY3kweU5UWXRZMlppT25Cc1lXbHVPbVJZYUZSVk1FNXhUVzFXV1UweFFuY3ZQM0psYldGeWEzTTlWVEZPVTFaRk9WQlVSbDl0YkRaWWJXNUxkM1JXUnpseVpWYzROazFxYXlabmNtOTFjRDFXTVdSWVRHeE9WRlZzVWxCVU1IZDFVVEE1VGcKc3NyOi8vTVRjeUxqRXdOQzR4TVRRdU1Ua3lPakV6TVRRek9tOXlhV2RwYmpwaFpYTXRNalUyTFdObVlqcHdiR0ZwYmpwU1dFNVNWREpXVlU1dGJFcGFNRVp0THo5eVpXMWhjbXR6UFZVeFRsTldSVGxRVkVZNE5rMTZRU1puY205MWNEMVdNV1JZVEd4T1ZGVnNVbEJVTUhkMVVUQTVUZwpzc3I6Ly9NVGN5TGpFd05DNHhNVE11TWpJM09qUXdNVEF3T205eWFXZHBianBoWlhNdE1qVTJMV05tWWpwd2JHRnBianBVYTJjeFZFaHdlRkV3Y0V0VlJUbEdMejl5WlcxaGNtdHpQVlV4VGxOV1JUbFFWRVk0TmsxNlJTWm5jbTkxY0QxV01XUllUR3hPVkZWc1VsQlVNSGQxVVRBNVRnCnNzcjovL01UY3lMakV3TkM0eE1ETXVNVEUwT2pRd01EUXpPbTl5YVdkcGJqcGhaWE10TWpVMkxXTm1ZanB3YkdGcGJqcFhiR1JOVGtaQ1drOUVaREZTTTBWNUx6OXlaVzFoY210elBWVXhUbE5XUlRsUVZFWTROazE2U1NabmNtOTFjRDFXTVdSWVRHeE9WRlZzVWxCVU1IZDFVVEE1VGcKc3NyOi8vTVRjeUxqRXdOQzQ1T1M0M056b3hNelV5T0RwdmNtbG5hVzQ2WVdWekxUSTFOaTFqWm1JNmNHeGhhVzQ2V2pGT1VFNUVaSE5VUlVwUFltMTNNQzhfY21WdFlYSnJjejFWTVU1VFZrVTVVRlJHT0RaTmVrMG1aM0p2ZFhBOVZqRmtXRXhzVGxSVmJGSlFWREIzZFZFd09VNApzc3I6Ly9NVE01TGpFMk1pNHhNVE11TVRrNU9qTXhNekkzT205eWFXZHBianBoWlhNdE1qVTJMV05tWWpwd2JHRnBianBhU0VKdVdUTlNVMUV3UmxKVFZHaGhMejl5WlcxaGNtdHpQVlV4VGxOV1JUbFFWRVk0TmsxNlVTWm5jbTkxY0QxV01XUllUR3hPVkZWc1VsQlVNSGQxVVRBNVRnCnNzcjovL05UUXVNVGs1TGpFMk5pNHhPVGc2TlRJME16RTZiM0pwWjJsdU9tRmxjeTB5TlRZdFkyWmlPbkJzWVdsdU9sZHJNVFpVYld4TVZETktTMkl6U25vdlAzSmxiV0Z5YTNNOVZURk9VMVpGT1ZCVVJqZzJUWHBWSm1keWIzVndQVll4WkZoTWJFNVVWV3hTVUZRd2QzVlJNRGxPCnNzcjovL05UUXVNVGs1TGpFMU1TNHlNem96TmpZeU5qcHZjbWxuYVc0NllXVnpMVEkxTmkxalptSTZjR3hoYVc0NllXNUdjMVJ0Y0ZGa1JFazBaVVpTVVM4X2NtVnRZWEpyY3oxVk1VNVRWa1U1VUZSR09EWk5lbGttWjNKdmRYQTlWakZrV0V4c1RsUlZiRkpRVkRCM2RWRXdPVTQKc3NyOi8vTlRRdU1qVXdMakUxTVM0M09EbzBNamc1TlRwdmNtbG5hVzQ2WVdWekxUSTFOaTFqWm1JNmNHeGhhVzQ2WW1wc1QyRXlhSE5pTUhCYVlUTndUeThfY21WdFlYSnJjejFWTVU1VFZrVTVVRlJHT0RaTmVtTW1aM0p2ZFhBOVZqRmtXRXhzVGxSVmJGSlFWREIzZFZFd09VNApzc3I6Ly9OVEl1TVRrMExqSXhPQzR4TnpveU56QTBNRHB2Y21sbmFXNDZZV1Z6TFRJMU5pMWpabUk2Y0d4aGFXNDZUa1JXZEZaV1NuaFhibU0wWkVST2JTOF9jbVZ0WVhKcmN6MVZNVTVUVmtVNVVGUkdPRFpOZW1jbVozSnZkWEE5VmpGa1dFeHNUbFJWYkZKUVZEQjNkVkV3T1U0CnNzcjovL01UY3lMakV3TlM0eU1qQXVNak0zT2pNME5qRTRPbTl5YVdkcGJqcGhaWE10TWpVMkxXTm1ZanB3YkdGcGJqcFRiVkpRVWxWNE1sTnJVbkpPVlhSWEx6OXlaVzFoY210elBWVXhUbE5XUlRsUVZFWTROazE2YXlabmNtOTFjRDFXTVdSWVRHeE9WRlZzVWxCVU1IZDFVVEE1VGcKc3NyOi8vTVRjeUxqRXdOUzR5TURrdU1qQXhPakU0TURJek9tOXlhV2RwYmpwaFpYTXRNalUyTFdObVlqcHdiR0ZwYmpwYU0xWkpaVlJDU2xVd1NrWmlSVnBaTHo5eVpXMWhjbXR6UFZVeFRsTldSVGxRVkVZNE5rNUVRU1puY205MWNEMVdNV1JZVEd4T1ZGVnNVbEJVTUhkMVVUQTVUZwpzc3I6Ly9OVFF1TWpRNExqY3hMakUwTlRveU5UazBORHB2Y21sbmFXNDZZV1Z6TFRJMU5pMWpabUk2Y0d4aGFXNDZXbnBHZVZsdFVsRmtia3AwV2pGU2FpOF9jbVZ0WVhKcmN6MVZNVTVUVmtVNVVGUkdPRFpPUkVVbVozSnZkWEE5VmpGa1dFeHNUbFJWYkZKUVZEQjNkVkV3T1U0CnNzcjovL01UTXVNVEUxTGpFeU15NHhNREU2TkRVMU1UazZiM0pwWjJsdU9tRmxjeTB5TlRZdFkyWmlPbkJzWVdsdU9sTXpUVEJrTW1Nd1ZIcGpNbFJIZUVNdlAzSmxiV0Z5YTNNOVZURk9VMVpGT1ZCVVJqZzJUa1JKSm1keWIzVndQVll4WkZoTWJFNVVWV3hTVUZRd2QzVlJNRGxPCnNzcjovL2RYTXhMbk56Y25OMVlpNTRlWG82TlRRek9tRjFkR2hmWVdWek1USTRYMjFrTlRwaFpYTXRNalUyTFdOMGNqcDBiSE14TGpKZmRHbGphMlYwWDJGMWRHZzZaRU0xZEZwVE9WUlZNVXBVVmxWSkx6OXZZbVp6Y0dGeVlXMDlOVXgxV1RaTVV6VlZNVTVUTlhKUGJ6VlpZVTFQYldnd1pFaEJOa3g1T1RCTWJVNTFUREJXU0ZOcmJEVmpiWGNtY0hKdmRHOXdZWEpoYlQxa1F6VjBXbE01VkZVeFNsUldWVWttY21WdFlYSnJjejFWTVU1VFZrVTVVRlJHT0RaT1JFMG1aM0p2ZFhBOVZqRmtXRXhzVGxSVmJGSlFWREIzZFZFd09VNApzc3I6Ly9OVFF1TWpNNExqSTFOUzQzT0RveU56QXhORHB2Y21sbmFXNDZZV1Z6TFRJMU5pMWpabUk2Y0d4aGFXNDZaV3RHVTFKSE9XRldWbkJVWkRKR2JDOF9jbVZ0WVhKcmN6MVZNVTVUVmtVNVVGUkdYMjFzTmxodGJrdDNkRlpIT1hKbFZ6ZzJUa1JSSm1keWIzVndQVll4WkZoTWJFNVVWV3hTVUZRd2QzVlJNRGxPCnNzcjovL1kyRXhMbk56Y25OMVlpNTRlWG82TkRRek9tRjFkR2hmWVdWek1USTRYMjFrTlRwaFpYTXRNalUyTFdOMGNqcDBiSE14TGpKZmRHbGphMlYwWDJGMWRHZzZZVWhTTUdORWIzWk1NMUYxV1RJMGRsSlZaRXRUV0d4NVlrRXZQMjlpWm5Od1lYSmhiVDAxVEhWWk5reFROVlV4VGxNMWNrOXZOVmxoVFU5dGFEQmtTRUUyVEhrNU1FeHRUblZNTUZaSVUydHNOV050ZHlad2NtOTBiM0JoY21GdFBXUkROWFJhVXpsVVZURktWRlpWU1NaeVpXMWhjbXR6UFZVeFRsTldSVGxRVkVZNE5rNUVWU1puY205MWNEMVdNV1JZVEd4T1ZGVnNVbEJVTUhkMVVUQTVUZwpzc3I6Ly9kWE15TG5OemNuTjFZaTU0ZVhvNk5EUXpPbUYxZEdoZllXVnpNVEk0WDIxa05UcGhaWE10TWpVMkxXTjBjanAwYkhNeExqSmZkR2xqYTJWMFgyRjFkR2c2WVVoU01HTkViM1pNTTFGMVdUSTBkbEpWWkV0VFdHeDVZa0V2UDI5aVpuTndZWEpoYlQwMVRIVlpOa3hUTlZVeFRsTTFjazl2TlZsaFRVOXRhREJrU0VFMlRIazVNRXh0VG5WTU1GWklVMnRzTldOdGR5WndjbTkwYjNCaGNtRnRQV1JETlhSYVV6bFVWVEZLVkZaVlNTWnlaVzFoY210elBWVXhUbE5XUlRsUVZFWTROazVFV1NabmNtOTFjRDFXTVdSWVRHeE9WRlZzVWxCVU1IZDFVVEE1VGcKc3NyOi8vZFhNeExuTnpjbk4xWWk1NGVYbzZORFF6T21GMWRHaGZZV1Z6TVRJNFgyMWtOVHBoWlhNdE1qVTJMV04wY2pwMGJITXhMakpmZEdsamEyVjBYMkYxZEdnNllVaFNNR05FYjNaTU0xRjFXVEkwZGxKVlpFdFRXR3g1WWtFdlAyOWlabk53WVhKaGJUMDFUSFZaTmt4VE5WVXhUbE0xY2s5dk5WbGhUVTl0YURCa1NFRTJUSGs1TUV4dFRuVk1NRlpJVTJ0c05XTnRkeVp3Y205MGIzQmhjbUZ0UFdSRE5YUmFVemxVVlRGS1ZGWlZTU1p5WlcxaGNtdHpQVlV4VGxOV1JUbFFWRVk0Tms1RVl5Wm5jbTkxY0QxV01XUllUR3hPVkZWc1VsQlVNSGQxVVRBNVRnCnNzcjovL2RYTXlMbk56Y25OMVlpNTRlWG82TlRRek9tRjFkR2hmWVdWek1USTRYMjFrTlRwaFpYTXRNalUyTFdOMGNqcDBiSE14TGpKZmRHbGphMlYwWDJGMWRHZzZaRU0xZEZwVE9WUlZNVXBVVmxWSkx6OXZZbVp6Y0dGeVlXMDlOVXgxV1RaTVV6VlZNVTVUTlhKUGJ6VlpZVTFQYldnd1pFaEJOa3g1T1RCTWJVNTFUREJXU0ZOcmJEVmpiWGNtY0hKdmRHOXdZWEpoYlQxa1F6VjBXbE01VkZVeFNsUldWVWttY21WdFlYSnJjejFWTVU1VFZrVTVVRlJHWDI1MmJ6ZHNiVGN3ZERVMGNUVTFUSFZYTldKbFpVOXFVVFFtWjNKdmRYQTlWakZrV0V4c1RsUlZiRkpRVkRCM2RWRXdPVTQKc3NyOi8vWTJFeExuTnpjbk4xWWk1NGVYbzZOVFF6T21GMWRHaGZZV1Z6TVRJNFgyMWtOVHBoWlhNdE1qVTJMV04wY2pwMGJITXhMakpmZEdsamEyVjBYMkYxZEdnNlpFTTFkRnBUT1ZSVk1VcFVWbFZKTHo5dlltWnpjR0Z5WVcwOU5VeDFXVFpNVXpWVk1VNVROWEpQYnpWWllVMVBiV2d3WkVoQk5reDVPVEJNYlU1MVREQldTRk5yYkRWamJYY21jSEp2ZEc5d1lYSmhiVDFrUXpWMFdsTTVWRlV4U2xSV1ZVa21jbVZ0WVhKcmN6MVZNVTVUVmtVNVVGUkdPRFpPUkdzbVozSnZkWEE5VmpGa1dFeHNUbFJWYkZKUVZEQjNkVkV3T1U0CnNzcjovL01UY3lMakV3TlM0M01TNDRNam80TURrNU9tOXlhV2RwYmpwaFpYTXRNalUyTFdObVlqcHdiR0ZwYmpwYVZXeFlUVVZTZFdGNldUVk9SRlV3V2xSYWRWVXpaREZqTTBJeVQxVlNkRlY2U1hkTldGSlNUVVZSTHo5eVpXMWhjbXR6UFZVeFRsTldSVGxRVkVaZmJIWnlabXh0TnpCMFUwZFdlbU15VlRaT1ZFRW1aM0p2ZFhBOVZqRmtXRXhzVGxSVmJGSlFWREIzZFZFd09VNApzc3I6Ly9ORFV1TVRRMExqSTBNUzR5TVRrNk16a3dNekE2YjNKcFoybHVPbUZsY3kweU5UWXRZMlppT25Cc1lXbHVPbFpZUmxGVU1VSlBMejl5WlcxaGNtdHpQVlV4VGxOV1JUbFFWRVpmYm5adk4yeHROekIwTlRkeE9UVTNjVzAxWW1WbFQycFZlQ1puY205MWNEMVdNV1JZVEd4T1ZGVnNVbEJVTUhkMVVUQTVUZwpzc3I6Ly9ORFl1TWprdU1UWTFMakV4TWpvNE1EZ3dPbTl5YVdkcGJqcGhaWE10TWpVMkxXTm1ZanB3YkdGcGJqcE5SRVY1VFhwUk1VNXFZelF2UDNKbGJXRnlhM005VlRGT1UxWkZPVkJVUmw5cmRqUlViblphWm0xc2NUaDBWRmM1ZWxreU9UTlBhbFY1Sm1keWIzVndQVll4WkZoTWJFNVVWV3hTVUZRd2QzVlJNRGxPCnNzcjovL01qRXdMakl3TXk0eU1DNDVNVG80TURnd09tOXlhV2RwYmpwaFpYTXRNalUyTFdObVlqcDBiSE14TGpKZmRHbGphMlYwWDJGMWRHZzZZa1JzU0dKclVteGtNR3hHTHo5dlltWnpjR0Z5WVcwOVkyMVdjMXBYUm5wYVdFMTFaRmRLTVdKdVVqRk1iVTUyWWxFbWNtVnRZWEpyY3oxVk1VNVRWa1U1VUZSR1gyeHFOMFJ0ZFdJMGREWkpaVFkxTkVkcU5UVjVRa2xIT1hsSlQxZFFjMDlsUW04dFpXTm5WRzh4VFhjbVozSnZkWEE5VmpGa1dFeHNUbFJWYkZKUVZEQjNkVkV3T1U0CnNzcjovL01UY3lMakV3TlM0M01TNDBPamd3T1RrNmIzSnBaMmx1T21GbGN5MHlOVFl0WTJaaU9uQnNZV2x1T2xwVmJGaE5SVkoxWVhwWk5VNUVWVEJhVkZwMVZUTmtNV016UWpKUFZWSjBWWHBKZDAxWVVsSk5SVkV2UDNKbGJXRnlhM005VlRGT1UxWkZPVkJVUmpnMlRsUlJKbWR5YjNWd1BWWXhaRmhNYkU1VVZXeFNVRlF3ZDNWUk1EbE8Kc3NyOi8vTVRVMExqZzBMakV1TVRNMk9qRTJOakF3T205eWFXZHBianBoWlhNdE1qVTJMV05tWWpwd2JHRnBianBPUm1oWFdsWkJlQzhfY21WdFlYSnJjejFWTVU1VFZrVTVVRlJHWDI5cVltWnNhR0pCZEZSdE9YbGtSMmRuVTBjNWMySkhSblZhUkc4eFRsRW1aM0p2ZFhBOVZqRmtXRXhzVGxSVmJGSlFWREIzZFZFd09VNAo=");
+    }
+
+    public void printPrompt() {
+        int length = 30;
+        int panddingLeft = 5;
+        System.out.println();
+        System.out.println(ConsoleUtil.getDefaultFormatLine("=", length, panddingLeft));
+        System.out.println(ConsoleUtil.getDefaultFormatLine(" ", length, panddingLeft));
+
+        System.out.println(ConsoleUtil.getDefaultFormatLine(
+                "1. 修改 ssr 配置", length, panddingLeft));
+        System.out.println(ConsoleUtil.getDefaultFormatLine(
+                "2. 获取 ssr 配置", length, panddingLeft));
+        System.out.println(ConsoleUtil.getDefaultFormatLine(
+                "3. 获取 ssr 订阅", length, panddingLeft));
+        System.out.println(ConsoleUtil.getDefaultFormatLine(
+                "q. 退出", length, panddingLeft));
+
+        System.out.println(ConsoleUtil.getDefaultFormatLine(" ", length, panddingLeft));
+        System.out.println(ConsoleUtil.getDefaultFormatLine("=", length, panddingLeft));
+
+        System.out.print("请选择输入操作序号：");
+    }
+
+    public void handle(String input) {
+        if ("q".equals(input)) {
+            System.exit(0);
+        }
+
+        if ("1".equals(input)) {
+            modifyConfig();
+        } else if ("2".equals(input)) {
+            readSSR(cfgFile);
+        } else if ("3".equals(input)) {
+            updateSSRSubscribe();
+        }
+        printPrompt();
+        handle(ConsoleUtil.getInput());
+    }
+
+    private void modifyConfig() {
+        System.out.print("请输入 ssr 链接：");
+        String ssr = ConsoleUtil.getInput();
+        if (null == ssr || !ssr.startsWith("ssr://")) {
+            System.out.print("输入有误，请重新输入 ssr 链接：");
+            ssr = ConsoleUtil.getInput();
+        } else {
+            parseSSRUrl(ssr, cfgFile);
+        }
+    }
+
+    public void parseSSRUrl(String ssr, String cfgFile) {
+        if (null == ssr || !ssr.startsWith("ssr://")) return;
+
+        System.out.println("ssr: " + ssr);
+
+        String content = ssr.substring(6);
+//        System.out.println("ssr - ssr://" + content);
+
+        System.out.println("content: " + content);
+        content = Base64.decode(content);
+        System.out.println("content decode: " + content);
+
+        String[] parts = content.split(":");
+//        System.out.println(JSON.toJSONString(parts));
+
+        SSRConfig config = new SSRConfig();
+        config.setServer(parts[0]);
+        config.setServer_port(Integer.valueOf(parts[1]));
+        config.setProtocol(parts[2]);
+        config.setMethod(parts[3]);
+        config.setObfs(parts[4]);
+
+        String[] passAndParams = parts[5].split("/");
+        config.setPassword(Base64.decode(passAndParams[0]));
+
+        if (passAndParams.length > 1) {
+            String[] params = passAndParams[1].substring(1).split("&");
+            for (String param : params) {
+                String[] vals = param.split("=");
+                if (null == vals || vals.length <= 1)
+                    continue;
+
+                if ("remarks".equals(vals[0])) {
+                    config.setRemarks(vals[1]);
+                } else if ("group".equals(vals[0])) {
+                    config.setGroup(vals[1]);
+                } else if ("obfsparam".equals(vals[0])) {
+                    config.setObfs_param(vals[1]);
+                }
+            }
+        }
+
+        System.out.println(JSON.toJSONString(config));
+        FileUtil.writeFile(cfgFile, JSON.toJSONString(config, true));
+    }
+
+    public void updateSSRSubscribe() {
+        System.out.print("请输入 ssr 订阅地址：");
+        String input = ConsoleUtil.getInput();
+        if (StrUtil.startWithIgnoreCase(input, "http")) {
+            parseSSRSubscribe(input);
+        } else {
+            decodeSSRSubscribe(input);
+        }
+    }
+
+    public void parseSSRSubscribe(String url) {
+        try {
+            decodeSSRSubscribe(HttpUtil.get(url));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void decodeSSRSubscribe(String content) {
+        System.out.println();
+        System.out.println(Base64.decode(content));
+    }
+
+    public void readSSR(String fileName) {
+        String content = FileUtil.readFile(fileName);
+        System.out.println("content: " + content);
+
+        SSRConfig config = JSON.parseObject(content, SSRConfig.class);
+        System.out.println("config: " + config);
+
+        List<Object> parts = new ArrayList<Object>();
+        parts.add(config.getServer());
+        parts.add(config.getServer_port());
+        parts.add(config.getProtocol());
+        parts.add(config.getMethod());
+        parts.add(config.getObfs());
+
+        String password = Base64.encode(config.getPassword());
+        List<Object> params = new ArrayList<Object>();
+        if (config.getRemarks() != null) {
+            params.add("remarks=" + config.getRemarks());
+        }
+        if (config.getGroup() != null) {
+            params.add("group=" + config.getGroup());
+        }
+        if (config.getObfs_param() != null) {
+            params.add("obfsparam=" + config.getObfs_param());
+        }
+        if (params.isEmpty()) {
+            parts.add(password);
+        } else {
+            parts.add(password + "/?" + StringUtil.join(params, "&"));
+        }
+
+        String ssr = "ssr://" + Base64.encode(StringUtil.join(parts, ":"));
+        System.out.println("ssr : " + ssr);
+    }
+}
